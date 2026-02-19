@@ -28,19 +28,26 @@ assign valid_pixel = ((x[10:9] == 2'b01) || (x[10:9] == 2'b0)) & valid & (x > 11
 
 //FFs
 wire [8:0] prev_addr;
-dffr #(9) display_addr_flipflop(.clk(clk), .r(reset), .d(read_address), .q(prev_addr));
+dffr #(9) read_addr_ff(
+	.clk(clk), 
+	.r(reset), 
+	.d(read_address), 
+	.q(prev_addr));
 wire [7:0] prev_value;
-dffre #(8) display_val_flipflop(.clk(clk), .r(reset), .en(read_address != prev_addr), .d(read_value_adjusted), .q(prev_value));
+dffre #(8) read_value_ff(
+	.clk(clk), 
+	.r(reset), 
+	.en(read_address != prev_addr), 
+	.d(read_value_adjusted), 
+	.q(prev_value));
 
-
-// Logic: If the current y_value is inbetween the current and previous rom_values, then
-reg displayLine;
+//when to display: between min and max of cur and prev y val
+reg display;
 always @(*) begin
-	if(y_val >= prev_value && y_val <= read_value_adjusted) displayLine = 1; //prev_value < read_value
-	else if(y_val <= prev_value && y_val >= read_value_adjusted) displayLine = 1; //prev_value > read_value
-	else displayLine = 0;
+	if(y_val >= prev_value && y_val <= read_value_adjusted) display = 1; //prev_value < read_value
+	else if(y_val <= prev_value && y_val >= read_value_adjusted) display = 1; //prev_value > read_value
+	else display = 0;
 end
 
-assign {r,g,b} = (displayLine & valid) ? 24'hFFFFFF : 24'h000000;
-
+assign {r,g,b} = (display & valid) ? 24'hFFFFFF : 24'h000000;
 endmodule
