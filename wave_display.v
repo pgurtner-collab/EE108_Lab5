@@ -99,7 +99,7 @@ module wave_display (
     wire [7:0] lo = (prev_sample <= curr_sample) ? prev_sample : curr_sample;
     wire [7:0] hi = (prev_sample <= curr_sample) ? curr_sample : prev_sample;
 
-    assign valid_pixel =  possible_delayed & (y8_delayed >= lo) & (y8_delayed <= hi) & (y8_delayed > 8'd22) & (x > 11'd300); //crop artifacts
+    assign valid_pixel =  possible_delayed & (y8_delayed >= lo) & (y8_delayed <= hi) & (y8_delayed > 8'd32) & (x > 11'd300); //crop artifacts
 
     //rgb
     assign r = valid_pixel ? 8'hFF : 8'h00;
