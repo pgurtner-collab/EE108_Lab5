@@ -1,5 +1,3 @@
-
-
 module wave_display (
     input clk,
     input reset,
@@ -15,22 +13,20 @@ module wave_display (
     output wire [7:0] b
 );
 
-// Read address: {read_index, 9th bit is 0 for quadrant 2 and 1 for quadrant 3, then we take x[7:1]
-// as instructed
+//read address: concat read index, x[9], then 7 bits of x not counting lsb
 assign read_address = {read_index, x[9], x[7:1]};
-
-
-
+	
+//adjust for aspect ratio/screen size
 wire [7:0] read_value_adjusted = (read_value >> 1) + 8'd32;
 
-// take 8:1 bits of y for the y value
+//take 8:1 bits of y for the y value
 wire [7:0] y_val;
 assign y_val = y[8:1];
-// Logic, pixel is valid if 9th and 8th bit is 01 or 10, so we use xor. We also clip the first pixel
-assign valid_pixel = (~y[9]) & (x[9] ^ x[8]) & valid & (x > 11'b00100000010);
+//pixel is valid if 9th and 8th bit is 01 or 10, so we use xor. also, clip the top y-vals to get rid of artifacts
+assign valid_pixel = ((x[10:9] == 2'b01) || (x[10:9] == 2'b0)) & valid & (x > 11'b00100000010);
 
 
-// Flip-flop for address and value
+//FFs
 wire [8:0] prev_addr;
 dffr #(9) display_addr_flipflop(.clk(clk), .r(reset), .d(read_address), .q(prev_addr));
 wire [7:0] prev_value;
